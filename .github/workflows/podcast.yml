@@ -253,6 +253,8 @@ jobs:
       - name: 检查同步小宇宙数据配置
         id: job_config
         if: steps.progress.outcome == 'success'
+        env:
+          RAW_ACTION_PAYLOAD: ${{ github.event.inputs.payload || '{}' }}
         run: |
           SERVICE_CONFIG="$PODCAST_CONFIG"
           PLAN=$(printf '%s' "$SERVICE_CONFIG" | jq -r '.PODCAST_SYNC_PLAN // "lifetime"')
@@ -324,6 +326,7 @@ jobs:
           fi
           cd runner
           python -m notionhub_runner sync podcast --job data
+
 
       - name: 记录同步小宇宙数据结果
         if: always() && steps.activation.outputs.enabled == 'true'
@@ -472,6 +475,8 @@ jobs:
       - name: 检查语音转文字配置
         id: job_config
         if: needs.data.outputs.enabled == 'true' && needs.data.result == 'success' && steps.restore.outcome == 'success'
+        env:
+          RAW_ACTION_PAYLOAD: ${{ github.event.inputs.payload || '{}' }}
         run: |
           SERVICE_CONFIG="$PODCAST_CONFIG"
           PLAN=$(printf '%s' "$SERVICE_CONFIG" | jq -r '.PODCAST_SYNC_PLAN // "lifetime"')
@@ -676,6 +681,7 @@ jobs:
           cd runner
           python -m notionhub_runner sync podcast --job transcription
 
+
       - name: 记录语音转文字结果
         if: always() && needs.data.outputs.enabled == 'true' && needs.data.result == 'success'
         run: |
@@ -825,6 +831,8 @@ jobs:
         id: job_config
         if: needs.data.outputs.enabled == 'true' && needs.transcription.result == 'success' && steps.restore.outcome == 'success'
         continue-on-error: true
+        env:
+          RAW_ACTION_PAYLOAD: ${{ github.event.inputs.payload || '{}' }}
         run: |
           SERVICE_CONFIG="$PODCAST_CONFIG"
           PLAN=$(printf '%s' "$SERVICE_CONFIG" | jq -r '.PODCAST_SYNC_PLAN // "lifetime"')
@@ -1032,6 +1040,7 @@ jobs:
           cd runner
           python -m notionhub_runner sync podcast --job transcript_backfill
 
+
       - name: 记录补写逐字稿结果
         if: always() && needs.data.outputs.enabled == 'true' && needs.transcription.result == 'success'
         continue-on-error: true
@@ -1178,6 +1187,8 @@ jobs:
         id: job_config
         if: needs.data.outputs.enabled == 'true' && needs.transcript_backfill.result == 'success' && steps.restore.outcome == 'success'
         continue-on-error: true
+        env:
+          RAW_ACTION_PAYLOAD: ${{ github.event.inputs.payload || '{}' }}
         run: |
           SERVICE_CONFIG="$PODCAST_CONFIG"
           PLAN=$(printf '%s' "$SERVICE_CONFIG" | jq -r '.PODCAST_SYNC_PLAN // "lifetime"')
@@ -1388,6 +1399,7 @@ jobs:
           fi
           cd runner
           python -m notionhub_runner sync podcast --job media_files
+
 
       - name: 记录上传已启用音频结果
         if: always() && needs.data.outputs.enabled == 'true' && needs.transcript_backfill.result == 'success'
